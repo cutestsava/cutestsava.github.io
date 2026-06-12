@@ -1,0 +1,929 @@
+@font-face {
+    font-family: 'mycustomfont';
+    src: url(MarggraffKursivZarte.ttf) format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'mycustomfont1';
+    src: url(PlovdivDisplay-Regular.otf) format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+
+}
+html, body, a, button, .timeline-content, .InfoSquare, .timeline-item img {
+    cursor: none !important;
+}
+.falling-particle {
+    position: absolute; /* Теперь лепесток привязан к странице, а не к экрану */
+    pointer-events: none;
+    z-index: 1;
+    user-select: none;
+    will-change: transform, opacity, top;
+    
+    animation-name: fallLinear, swayAnimation;
+    animation-timing-function: linear, ease-in-out;
+    animation-iteration-count: infinite, infinite;
+    animation-play-state: running, running;
+}
+
+/* 1. Анимация падения вниз */
+@keyframes fallLinear {
+    0% {
+        top: var(--start-y);
+    }
+    100% {
+        top: var(--end-y);
+    }
+}
+
+/* 2. Анимация покачивания (ветер) */
+@keyframes swayAnimation {
+    0%, 100% {
+        transform: translateX(0px) rotate(0deg);
+    }
+    50% {
+        /* В середине пути лепесток смещается в сторону и поворачивается */
+        transform: translateX(var(--sway-distance)) rotate(var(--sway-angle));
+    }
+}
+.letter-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+    margin: 70px 0;
+}
+
+.envelope {
+    position: relative;
+    width: 320px;
+    height: 200px;
+    background: #fdf5f6; /* Цвет задней стенки */
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    cursor: pointer;
+    perspective: 1000px; /* Добавляем перспективу для 3D откидывания */
+    transition: transform 0.3s ease;
+}
+
+/* Эффект парения при наведении */
+.envelope:hover {
+    transform: translateY(-5px);
+}
+
+/* Лицевая часть конверта (вырезана полигоном, чтобы была похожа на кармашек) */
+.envelope-front {
+    position: absolute;
+    bottom: 0; left: 0; right: 0; top: 0;
+    background: #f9d8de;
+    clip-path: polygon(0 0, 50% 50%, 100% 0, 100% 100%, 0 100%);
+    z-index: 3;
+    pointer-events: none;
+    border-radius: 0 0 8px 8px;
+}
+
+/* Откидная крышка (клапан) */
+.envelope-flap {
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 100%;
+    background: #f3c2cb;
+    clip-path: polygon(0 0, 100% 0, 50% 50%);
+    transform-origin: top; /* Точка сгиба сверху */
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), z-index 0.6s;
+    z-index: 4;
+    pointer-events: none;
+    border-radius: 8px 8px 0 0;
+}
+
+/* Печать */
+.envelope-seal {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 35px;
+    z-index: 5;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
+
+/* Бумага с письмом */
+.envelope-paper {
+    position: absolute;
+    top: 10px; left: 10px; right: 10px; bottom: 10px;
+    background: var(--card-bg, #fff); /* Берём переменную из твоей темы */
+    padding: 25px;
+    border-radius: 6px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    z-index: 2; /* Изначально спрятано за лицевой частью */
+    transition: all 0.8s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.paper-content {
+    opacity: 0; /* Текст не виден, пока письмо внутри */
+    transition: opacity 0.5s ease;
+    color: var(--text-color, #4a4a4a);
+    text-align: center;
+}
+
+.paper-content h3 {
+    color: var(--accent-color, #db7093);
+    margin-bottom: 15px;
+}
+
+
+.close-letter:hover {
+    background: #e0529e;
+}
+
+/* =========================================
+   ЛОГИКА ОТКРЫТОГО СОСТОЯНИЯ (Класс .open)
+   ========================================= */
+
+/* 1. Клапан откидывается назад */
+.envelope.open .envelope-flap {
+    transform: rotateX(180deg);
+    z-index: 1; /* Уходит на задний план */
+}
+
+/* 2. Печать исчезает */
+.envelope.open .envelope-seal {
+    opacity: 0;
+}
+
+/* 3. Письмо выезжает вверх и увеличивается в размерах */
+.envelope.open .envelope-paper {
+    margin-top: 10%;
+    transform: translateY(-160px) scale(1.1);
+    z-index: 10; /* Перекрывает всё остальное */
+    height: auto;
+    min-height: 400px;
+    box-shadow: 0 20px 40px var(--shadow-color, rgba(0,0,0,0.15));
+}
+
+/* 4. Текст плавно проявляется после того, как письмо выехало */
+.envelope.open .paper-content {
+    opacity: 1;
+    transition-delay: 0.4s; 
+}
+
+button, 
+input[type="checkbox"], 
+input[type="submit"],
+.jar-box,
+.theme-switch,
+.slider,
+.envelope,
+.close-letter,
+.checklist-item {
+    cursor: none !important;
+}
+.custom-paw-cursor {
+    width: 45px;  /* Задаем аккуратный размер лапки */
+    height: 45px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-image: url('https://srisovki.ru/wp-content/uploads/2024/11/taba-lapka-skvish.webp');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    pointer-events: none; /* Чтобы лапка не мешала кликать по кнопкам и ссылкам */
+    z-index: 10000;       /* Поднимаем лапку на самый верхний слой, над всеми фото и ветками */
+    
+    /* Сдвигаем точку клика ровно на центр лапки (или на подушечку) */
+    transform: translate(-50%, -50%); 
+    
+    /* Оптимизация для плавной анимации */
+    will-change: transform; 
+    display: none; /* Прячем лапку, пока пользователь не пошевелит мышкой */
+}
+.checklist-card {
+    background: var(--card-bg, rgba(255, 255, 255, 0.65));
+    border: 1px solid var(--border-color, rgba(255, 182, 193, 0.5));
+    box-shadow: 0 8px 32px var(--shadow-color, rgba(255, 182, 193, 0.3));
+    border-radius: 16px;
+    padding: 25px;
+    max-width: 360px;
+    margin: 30px auto;
+    backdrop-filter: blur(4px);
+    transition: all 0.5s ease;
+}
+
+.checklist-header h3 {
+    color: var(--accent-color, #ff69b4);
+    margin-top: 0;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 1.2rem;
+}
+
+.checklist-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.checklist-list li {
+    margin-bottom: 14px;
+}
+
+.checklist-list li:last-child {
+    margin-bottom: 0;
+}
+
+/* Стилизация контейнера строки */
+.checklist-item {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+/* Прячем дефолтный чекбокс */
+.checklist-item input {
+    display: none;
+}
+
+/* Создаем кастомный чекбокс */
+.custom-checkbox {
+    height: 20px;
+    width: 20px;
+    border: 2px solid var(--accent-color, #ff69b4);
+    border-radius: 6px;
+    margin-right: 12px;
+    position: relative;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+/* Эффект галочки (рисуем её через border) */
+.custom-checkbox:after {
+    content: "";
+    position: absolute;
+    display: none;
+    left: 6px;
+    top: 2px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+/* Когда чекбокс активен — заливаем его цветом и показываем галочку */
+.checklist-item input:checked + .custom-checkbox {
+    background-color: var(--accent-color, #ff69b4);
+    border-color: var(--accent-color, #ff69b4);
+}
+
+.checklist-item input:checked + .custom-checkbox:after {
+    display: block;
+}
+
+/* Стили для текста пункта */
+.item-text {
+    color: var(--text-color, #4a4a4a);
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+/* Когда пункт выполнен — текст слегка тускнеет и зачеркивается */
+.checklist-item input:checked ~ .item-text {
+    opacity: 0.6;
+    text-decoration: line-through;
+}
+
+/* Блок с финальным поздравлением (изначально скрыт) */
+.checklist-success {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    text-align: center;
+    color: var(--accent-color, #ff69b4);
+    font-weight: bold;
+    font-size: 0.95rem;
+    margin-top: 0;
+}
+
+/* Класс, который покажет сообщение (добавим через JS) */
+.checklist-success.show {
+    max-height: 60px;
+    opacity: 1;
+    margin-top: 20px;
+}
+html {
+    background-color: #FFCBDB;
+}
+html, body {
+    user-select: none;
+    height: 100%;
+    margin: 0;
+    scroll-behavior: smooth;
+    font-family: 'mycustomfont1';
+    position: relative;
+    overflow-x: hidden;
+    -ms-overflow-style: none; /* IE и Edge старых версий */
+    scrollbar-width: none;
+}
+
+.love-counter {
+    background: rgba(255, 255, 255, 0.65); /* Размытый полупрозрачный фон */
+    backdrop-filter: blur(8px);
+    border-radius: 20px;
+    padding: 20px 25px;
+    max-width: 450px;
+    margin: 20px auto;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(255, 182, 193, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.counter-title {
+    font-size: 1.2rem;
+    color: #db7093;
+    margin-bottom: 15px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.counter-board {
+    display: flex;
+    justify-content: space-around;
+    gap: 10px;
+}
+
+.time-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 70px;
+}
+
+.time-val {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #ff69b4;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
+}
+
+.time-label {
+    font-size: 0.8rem;
+    color: #8b8b8b;
+    margin-top: 4px;
+    text-transform: lowercase;
+}
+
+/* Сделаем так, чтобы блок секунд слегка покачивался или обновлялся динамично */
+#seconds {
+    color: #ff1493;
+}
+
+.heart-particle {
+    position: fixed; /* Фиксируем относительно экрана, чтобы не зависеть от скролла */
+    pointer-events: none; /* Пропускаем клики сквозь частицы */
+    user-select: none;
+    z-index: 9999; /* Чуть выше курсора (у курсора 10000) */
+    
+    /* Начальное положение в точке клика, корректируем центр */
+    transform: translate(-50%, -50%); 
+    
+    /* Запускаем анимацию: название, длительность, тип, финальное состояние */
+    animation: heartBurstAnim 0.8s ease-out forwards;
+    
+    /* Оптимизация производительности */
+    will-change: transform, opacity;
+}
+
+/* @keyframes для анимации взрыва */
+@keyframes heartBurstAnim {
+    0% {
+        /* Начало: в точке клика, масштаб 0.3 */
+        transform: translate(-50%, -50%) scale(0.3) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        /* Финал: разлет по координатам --dx и --dy, наклон --angle, масштаб 1, прозрачность 0 */
+        transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1) rotate(var(--angle));
+        opacity: 0;
+    }
+}
+
+#hearts-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    overflow: hidden;
+    z-index: -10;          /* Прячем глубоко под текст, фото и линии */
+    pointer-events: none;  /* Чтобы сквозь них можно было кликать и выделять текст */
+}
+
+.bg-heart {
+    position: absolute;
+    opacity: 0.25;         /* Нежная полупрозрачность, чтобы не пестрило */
+    user-select: none;
+    pointer-events: none;
+    will-change: transform;
+}
+
+.floral-container {
+    position: absolute;
+    top: 0;
+    width: 120px; /* Немного расширили для веточек */
+    height: 100%; 
+    pointer-events: none; 
+    z-index: 0; 
+}
+
+.floral-container.right { right: 0; }
+.floral-container:not(.right) { left: 0; }
+
+.branch-wrapper {
+    position: absolute;
+    left: 50%;
+    transform-origin: left center;
+}
+/* Полупрозрачный центральный стебель (теперь мягкого зеленого цвета) */
+.floral-container::after {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0; left: 50%;
+    width: 2px;
+    background: linear-gradient(to bottom, rgba(129, 178, 154, 0.2), rgba(129, 178, 154, 0.8));
+    transform: translateX(-50%);
+}
+
+.primary-twig, .secondary-twig {
+    position: absolute;
+    top: 0;
+    /* Цвет самого стебля (сделай его зеленым, если он был прозрачным) */
+    background-color: #81b29a; 
+    transform-origin: left center;
+    /* Убираем overflow, чтобы листочки были видны */
+    overflow: visible !important; 
+}
+
+/* Основная ветка */
+.primary-twig {
+    height: 2px; /* Толщина стебля */
+    z-index: 1;
+}
+
+/* Побочная веточка */
+.secondary-twig {
+    height: 1.5px; /* Чуть тоньше */
+    z-index: -1;
+    top: 50%; /* Растет из центра основной */
+    transform: translateY(-50%);
+}
+
+/* Общие стили для всех листочков (псевдоэлементов) */
+.primary-twig::before,
+.primary-twig::after,
+.secondary-twig::before,
+.secondary-twig::after {
+    content: '';
+    position: absolute;
+    background-color: #a8d08d; /* Сочный зеленый цвет листьев */
+    /* Магия CSS: создаем форму капли/листика */
+    border-radius: 50% 0 50% 0; 
+    /* Анимация появления (по желанию, если AOS включен для лоз) */
+    transition: transform 0.3s ease-out;
+}
+
+/* --- Листочки на основной ветке (.primary-twig) --- */
+
+/* Верхний листик (ближе к началу веточки) */
+.primary-twig::before {
+    width: 10px;  /* Размеры */
+    height: 5px;
+    left: 5px;    /* Отступ от центрального стебля */
+    top: -4px;   /* Позиция над стеблем */
+    transform: rotate(-15deg); /* Элегантный наклон */
+}
+
+/* Нижний листик (чуть дальше) */
+.primary-twig::after {
+    width: 8px;
+    height: 4px;
+    left: 15px;   /* Чуть дальше по ветке */
+    bottom: -3px; /* Позиция под стеблем */
+    transform: rotate(15deg) scaleY(-1); /* Наклон вниз и отзеркаливание */
+}
+
+/* --- Листочки на побочной веточке (.secondary-twig) --- */
+/* Делаем их чуть меньше */
+
+.secondary-twig::before {
+    width: 7px;
+    height: 3.5px;
+    left: 3px;
+    top: -3px;
+    transform: rotate(-20deg);
+}
+
+.secondary-twig::after {
+    width: 6px;
+    height: 3px;
+    left: 10px;
+    bottom: -2.5px;
+    transform: rotate(20deg) scaleY(-1);
+}
+.branch-item {
+    position: absolute;
+    top: 50%;
+    left: 100%; /* На кончик ветки */
+    width: 26px; height: 26px;
+    display: flex; align-items: center; justify-content: center;
+}
+.branch-item svg { width: 100%; height: 100%; }
+#floral-garden-bottom {
+    overflow: hidden;       /* Срезаем нижнюю кромку и бока по экрану */
+    pointer-events: none;   
+    z-index: 10;            
+    background-color: transparent;
+}
+
+/* Стилизация каждого отдельного цветка */
+.garden-flower-wrapper {
+    position: absolute;     
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform-origin: center center;
+    will-change: transform;
+}
+
+.garden-flower-wrapper svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+p {
+    font-family: 'mycustomfont1';
+}
+h1 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'mycustomfont';
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 5%;
+}
+h2 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.jar-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 40px auto;
+    max-width: 400px;
+    text-align: center;
+}
+
+/* Сама баночка (сборная конструкция) */
+.jar-box {
+    margin-top: 10%;
+    position: relative;
+    width: 120px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    user-select: none;
+}
+
+.jar-box:hover {
+    transform: scale(1.05); /* Легкое увеличение при наведении */
+}
+
+/* Крышка */
+.jar-lid {
+    width: 80px;
+    height: 16px;
+    background: #e6a1b5;
+    border-radius: 6px 6px 2px 2px;
+    margin: 0 auto;
+    box-shadow: inset 0 2px 4px rgba(255,255,255,0.4);
+}
+
+/* Горлышко */
+.jar-neck {
+    width: 66px;
+    height: 12px;
+    background: rgba(255, 255, 255, 0.5);
+    border: 2px solid rgba(255, 182, 193, 0.6);
+    border-top: none;
+    border-bottom: none;
+    margin: 0 auto;
+}
+
+/* Тело баночки */
+.jar-body {
+    width: 110px;
+    height: 130px;
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(5px);
+    border: 3px solid rgba(255, 182, 193, 0.6);
+    border-radius: 20px 20px 35px 35px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 20px rgba(255, 182, 193, 0.15), 
+                inset 0 0 15px rgba(255, 255, 255, 0.6);
+    position: relative;
+}
+
+/* Этикетка на баночке */
+.jar-label {
+    background: #fff;
+    padding: 4px 10px;
+    font-size: 0.75rem;
+    color: #db7093;
+    border-radius: 6px;
+    border: 1px dashed #ffb6c1;
+    font-weight: bold;
+    transform: rotate(-3deg);
+    margin-bottom: 10px;
+}
+
+.jar-heart {
+    font-size: 1.5rem;
+    animation: jarHeartPulse 2s infinite ease-in-out;
+}
+
+/* Текст записки (облачко) */
+.compliment-bubble {
+    margin-top: 25px;
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(255, 192, 203, 0.5);
+    padding: 15px 20px;
+    border-radius: 18px;
+    font-size: 1.05rem;
+    color: #4a4a4a;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Класс для плавной смены текста */
+.compliment-bubble.fade {
+    opacity: 0;
+    transform: translateY(5px);
+}
+
+/* АНИМАЦИИ */
+
+/* Пульсация сердечка внутри баночки */
+@keyframes jarHeartPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+}
+
+/* Тряска баночки при клике */
+.shake-animation {
+    animation: shakeJar 0.4s ease-in-out;
+}
+
+@keyframes shakeJar {
+    0%, 100% { transform: rotate(0deg) scale(1.05); }
+    20%, 60% { transform: rotate(-8deg) scale(1.05); }
+    40%, 80% { transform: rotate(8deg) scale(1.05); }
+}
+
+
+
+.InfoSquare {
+    font-family: 'mycustomfont';
+    margin-left: auto;
+    margin-right: auto;
+    width: 35%;
+    height: auto;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px); /* для Safari */
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    padding: 30px;
+    color: #000000;
+    will-change: transform;
+    transform-style: preserve-3d;
+    transition: box-shadow 0.3s ease, transform 0.1s linear;
+}
+
+.timeline-section {
+    padding: 80px 20px;
+}
+
+.timeline {
+    position: relative;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+/* Центральная вертикальная линия */
+.timeline::after {
+    content: '';
+    position: absolute;
+    width: 4px;
+    background-color: #ffb7b2;
+    top: 0;
+    /* Продлеваем линию в самый низ. 
+       Отрицательное значение опустит её на 100px ниже последней карточки. 
+       Можешь увеличить это число (например, до -200px), если нужно длиннее */
+    bottom: -100px; 
+    left: 50%;
+    margin-left: -2px; /* Идеальное центрирование */
+    z-index: 0; /* ОПУСКАЕМ ЛИНИЮ НА ЗАДНИЙ ПЛАН */
+}
+
+/* 2. Контейнер для каждого события */
+.timeline-item {
+    position: relative;
+    width: 50%;
+    box-sizing: border-box;
+    margin-bottom: 60px; /* Отступ между карточками по вертикали */
+    z-index: 2; /* ПОДНИМАЕМ ВЕСЬ БЛОК С КАРТОЧКАМИ НАД ЛИНИЕЙ */
+}
+
+/* Левые элементы (нечетные карточки) */
+.timeline-item:nth-child(odd) {
+    left: 0;
+    padding-right: 50px; /* Расстояние от карточки до центральной линии */
+}
+
+/* Правые элементы (четные карточки) */
+.timeline-item:nth-child(even) {
+    left: 50%;
+    padding-left: 50px; /* Расстояние от карточки до центральной линии */
+}
+
+/* Сама карточка с контентом (белое облако) */
+.timeline-content {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    width: 100%;
+    box-sizing: border-box;
+    position: relative;
+    z-index: 3; /* ДЕЛАЕМ САМУ КАРТОЧКУ ВЫШЕ СОЕДИНИТЕЛЬНЫХ ПАЛОЧЕК */
+    will-change: transform;
+    transform-style: preserve-3d;
+    transition: box-shadow 0.3s ease, transform 0.1s linear;
+}
+
+/* 4. Фотографии внутри таймлайна */
+.timeline img {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important; /* Сохраняет пропорции, чтобы лица не вытягивались */
+    display: block;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    position: relative; /* ОБЯЗАТЕЛЬНО ДЛЯ РАБОТЫ Z-INDEX */
+    z-index: 4; /* ФОТО ТОЧНО ПОВЕРХ ВСЕГО */
+    transform: translateZ(20px); /* Выталкивает фото чуть вперед внутри карточки */
+    transition: transform 0.3s ease;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #fff;
+    border: 4px solid #ffb7b2; /* Розовый ободок */
+    top: 30px; /* Высота кружка относительно верха карточки */
+    z-index: 2; /* Чтобы кружок лег ПОВЕРХ вертикальной линии */
+    box-sizing: border-box;
+}
+
+/* Позиционируем кружок для левых карточек */
+.timeline-item:nth-child(odd)::before {
+    right: -10px; /* Сдвигаем на половину ширины кружка вправо */
+}
+
+/* Позиционируем кружок для правых карточек */
+.timeline-item:nth-child(even)::before {
+    left: -10px; /* Сдвигаем на половину ширины кружка влево */
+}
+
+
+/* 2. ГОРИЗОНТАЛЬНЫЕ ПАЛОЧКИ (СОЕДИНИТЕЛИ) */
+.timeline-item::after {
+    content: '';
+    position: absolute;
+    height: 2px;
+    background-color: #ffb7b2;
+    top: 39px; /* Центрируем палочку ровно по середине кружочка */
+    z-index: 1;
+}
+
+/* Палочка для левых элементов (тянется от карточки вправо до линии) */
+.timeline-item:nth-child(odd)::after {
+    right: 0;
+    width: 50px; /* Длина равна значению padding-right у .timeline-item */
+}
+
+/* Палочка для правых элементов (тянется от линии вправо до карточки) */
+.timeline-item:nth-child(even)::after {
+    left: 0;
+    width: 50px; /* Длина равна значению padding-left у .timeline-item */
+}
+.timeline-opposite {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%); /* Центрируем ровно по высоте карточки */
+    width: 85%; /* Чтобы текст не прижимался вплотную к краям экрана */
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    z-index: 1;
+}
+
+/* ЕСЛИ КАРТОЧКА СЛЕВА: текст отправляем на пустую ПРАВУЮ сторону */
+.timeline-item:nth-child(odd) .timeline-opposite {
+    left: 100%; /* Выталкиваем за пределы 50% ширины карточки */
+    padding-left: 40px; /* Отступ от центральной линии */
+    align-items: flex-start;
+    text-align: left;
+}
+
+/* ЕСЛИ КАРТОЧКА СПРАВА: текст отправляем на пустую ЛЕВУЮ сторону */
+.timeline-item:nth-child(even) .timeline-opposite {
+    right: 100%; /* Выталкиваем влево */
+    padding-right: 40px; /* Отступ от центральной линии */
+    align-items: flex-end;
+    text-align: right;
+}
+.opposite-date {
+    font-family: 'mycustomfont'; /* Твой кастомный рукописный шрифт */
+    font-size: 2.8rem;
+    color: #ffffff;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.15);
+    margin-bottom: 5px;
+}
+
+/* Стиль для текста воспоминаний (эффект матового стекла, как у InfoSquare) */
+.opposite-text {
+    font-size: 1.05rem;
+    color: #333333;
+    line-height: 1.5;
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 16px;
+    padding: 15px 20px;
+    max-width: 320px; /* Ограничиваем ширину, чтобы текст смотрелся аккуратно */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+@media screen and (max-width: 768px) {
+    /* Сдвигаем центральную линию влево */
+    .timeline::after {
+        left: 31px;
+    }
+
+    /* Делаем карточки на всю ширину экрана */
+    .timeline-item {
+        width: 100% !important;
+        left: 0 !important;
+        padding-left: 70px !important; /* Отступ слева для линии */
+        padding-right: 20px !important;
+    }
+
+    /* Переносим все кружочки на левую линию */
+    .timeline-item::before {
+        left: 21px !important;
+    }
+
+    /* Переносим все палочки-соединители налево */
+    .timeline-item::after {
+        left: 31px !important;
+        width: 40px !important;
+    }
+}
